@@ -1,4 +1,4 @@
-triggers = {
+currency_triggers = {
     ('рупияв',): 'INR',
     ('рупиев',): 'INR',
     ('рупий',): 'INR',
