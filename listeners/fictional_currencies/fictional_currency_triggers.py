@@ -1,4 +1,4 @@
-fictional_triggers = {
+fictional_currency_triggers = {
     #('EE',): 'AA',
     #('OO',): 'BB',
 }
