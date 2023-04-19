@@ -6,7 +6,7 @@ from .currency_emojis import *
 from .get_rates import *
 from .main_currencies import *
 from .preprocess_message import *
-from .triggers import *
+from .currency_triggers import *
 
 def convert_currency(update: Update, context: CallbackContext):
     if update.message is None:
@@ -15,10 +15,10 @@ def convert_currency(update: Update, context: CallbackContext):
     response = ''
     processed_amounts = set()
 
-    # Sort triggers by the number of words in descending order
-    sorted_triggers = sorted(triggers.items(), key=lambda x: -len(x[0]))
+    # Sort currency triggers by the number of words in descending order
+    sorted_triggers = sorted(currency_triggers.items(), key=lambda x: -len(x[0]))
 
-    # Find all matches of triggers in the message
+    # Find all matches of currency triggers in the message
     matches = []
     for trigger_words, currency_code in sorted_triggers:
         trigger_regex = r'\s*'.join([re.escape(word) for word in trigger_words])
@@ -27,7 +27,7 @@ def convert_currency(update: Update, context: CallbackContext):
             end_index = match.end()
             amount = None
 
-            # Check if there is a number before the trigger
+            # Check if there is a number before the currency trigger
             if start_index > 0:
                 pre_match = message[:start_index].rstrip()
                 pre_match_number = re.search(r'(\d[\d\s]*[.,])?\d+\s*$', pre_match)
@@ -35,7 +35,7 @@ def convert_currency(update: Update, context: CallbackContext):
                     amount = float(pre_match_number.group().replace(',', '.'))
                     start_index = pre_match_number.start()
 
-            # Check if there is a number after the trigger
+            # Check if there is a number after the currency trigger
             if amount is None and end_index < len(message):
                 post_match = message[end_index:].lstrip()
                 post_match_number = re.search(r'^\s*(\d[\d\s]*[.,])?\d+', post_match)
@@ -43,7 +43,7 @@ def convert_currency(update: Update, context: CallbackContext):
                     amount = float(post_match_number.group().replace(',', '.'))
                     end_index += post_match_number.end()
 
-            # If a number was found before or after the trigger
+            # If a number was found before or after the currency trigger
             if amount is not None:
                 matches.append((currency_code, amount, start_index, end_index))
 
