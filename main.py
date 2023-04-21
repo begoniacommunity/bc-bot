@@ -2,8 +2,7 @@ import re, requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler, BaseFilter
 
-from listeners import *
-from cmds import *
+from handlers import *
 from keepalive import *
 from secrets import TELEGRAM_TOKEN
 
