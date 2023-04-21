@@ -12,6 +12,9 @@ def handle_callback(update: Update, context: CallbackContext):
         query.message.delete()
 
 class UserAndChannelFilter(BaseFilter):
+    def __init__(self, mode):
+        self.mode = mode
+
     def __call__(self, update: Update):
         if update.message is None:
             return False
@@ -19,21 +22,22 @@ class UserAndChannelFilter(BaseFilter):
         chat = update.message.chat
         user_id = str(update.message.from_user.id)
 
-        if chat.type == 'private' and user_id != '1010949968':
+        if self.mode == 0:
+            return chat.type != 'private' and chat.username == 'begoniacommunity'
+        elif self.mode == 1:
+            return chat.type == 'private' and user_id == '1010949968'
+        elif self.mode == 2:
+            return (chat.type == 'private' and user_id == '1010949968') or (chat.type != 'private' and chat.username == 'begoniacommunity')
+        else:
             return False
-
-        if chat.type != 'private' and chat.username != 'begoniacommunity':
-            return False
-
-        return True
 
 def main():
     updater = Updater(TELEGRAM_TOKEN, use_context=True)
 
     dp = updater.dispatcher
-    dp.add_handler(CommandHandler("alo", alo))
-    dp.add_handler(CommandHandler("cum", cum))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command & UserAndChannelFilter(), convert_currency), group=0)
+    dp.add_handler(CommandHandler("alo", alo, filters=UserAndChannelFilter(2)))
+    dp.add_handler(CommandHandler("cum", cum, filters=UserAndChannelFilter(2)))
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command & UserAndChannelFilter(2), convert_currency), group=0)
     dp.add_handler(CallbackQueryHandler(handle_callback))
 
     updater.start_polling()
