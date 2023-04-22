@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime, timedelta
 
-from secrets import EXCHANGERATES_TOKEN
+from main import EXCHANGERATES_TOKEN
 
 cache = {}
 

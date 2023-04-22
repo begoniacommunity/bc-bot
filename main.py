@@ -4,7 +4,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 
 from handlers import *
 from keepalive import *
-from secrets import TELEGRAM_TOKEN
+from secrets import *
 
 def handle_callback(update: Update, context: CallbackContext):
     query = update.callback_query
