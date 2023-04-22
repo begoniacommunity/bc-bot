@@ -37,7 +37,9 @@ def main():
     dp = updater.dispatcher
     dp.add_handler(CommandHandler("alo", alo, filters=UserAndChannelFilter(2)))
     dp.add_handler(CommandHandler("cum", cum, filters=UserAndChannelFilter(2)))
+    dp.add_handler(CommandHandler("stats", stats, filters=UserAndChannelFilter(0)))
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command & UserAndChannelFilter(2), convert_currency), group=0)
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command & UserAndChannelFilter(0), log_message), group=1)
     dp.add_handler(CallbackQueryHandler(handle_callback))
 
     updater.start_polling()
