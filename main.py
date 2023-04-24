@@ -3,8 +3,13 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler, BaseFilter
 
 from handlers import *
-from keepalive import *
 from static.tokens import *
+
+# A blank http page via aiohttp
+HTTP_SERVER=False
+
+if HTTP_SERVER:
+    from keepalive import *
 
 def handle_callback(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -43,7 +48,8 @@ def main():
     dp.add_handler(CallbackQueryHandler(handle_callback))
 
     updater.start_polling()
-    web.run_app(app)
+    if HTTP_SERVER:
+        web.run_app(app)
     updater.idle()
 
 if __name__ == '__main__':
