@@ -1,11 +1,13 @@
-from telegram import Update
-import sqlite3
+from aiogram import types
+import aiosqlite
 
-def log_message(update: Update, context):
-    connect = sqlite3.connect('./static/msg_stats.db')
-    curs = connect.cursor()
+async def log_message(message: types.Message):
+    async with aiosqlite.connect('./static/msg_stats.db') as connect:
+        curs = await connect.cursor()
 
-    user_id = update.effective_user.id
-    timestamp = update.message.date.strftime('%Y-%m-%d %H:%M:%S')
-    curs.execute('INSERT INTO messages (user_id, timestamp) VALUES (?, ?)', (user_id, timestamp))
-    connect.commit()
+        user_id = message.from_user.id
+        timestamp = message.date.strftime('%Y-%m-%d %H:%M:%S')
+        await curs.execute('INSERT INTO messages (user_id, timestamp) VALUES (?, ?)', (user_id, timestamp))
+        await connect.commit()
+
+        await curs.close()

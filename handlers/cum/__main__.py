@@ -1,4 +1,4 @@
-from telegram import Update
-    
-def cum(update: Update, context):
-    update.message.reply_text('🍆💦')
+from aiogram import types
+
+async def cum(message: types.Message):
+    await message.answer('🍆💦')

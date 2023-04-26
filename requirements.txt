@@ -1,3 +1,5 @@
-python-telegram-bot==13.7
-requests
-aiohttp
+asyncio>=3.4.3
+aiogram>=2.25.1
+aiohttp>=3.8.4
+aiosqlite>=0.19.0
+requests>=2.28.2

@@ -1,17 +1,17 @@
 import re
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackContext
+from aiogram import types
+from aiogram.dispatcher import FSMContext
 
 from .currency_emojis import *
+from .currency_triggers import *
 from .get_rates import *
 from .main_currencies import *
 from .preprocess_message import *
-from .currency_triggers import *
 
-def convert_currency(update: Update, context: CallbackContext):
-    if update.message is None:
+async def convert_currency(message: types.Message, state: FSMContext):
+    if not message.text:
         return
-    message = preprocess_message(update.message.text.lower())
+    text = preprocess_message(message.text.lower())
     response = ''
     processed_amounts = set()
 
@@ -22,22 +22,22 @@ def convert_currency(update: Update, context: CallbackContext):
     matches = []
     for trigger_words, currency_code in sorted_triggers:
         trigger_regex = r'\s*'.join([re.escape(word) for word in trigger_words])
-        for match in re.finditer(trigger_regex, message):
+        for match in re.finditer(trigger_regex, text):
             start_index = match.start()
             end_index = match.end()
             amount = None
 
             # Check if there is a number before the currency trigger
             if start_index > 0:
-                pre_match = message[:start_index].rstrip()
+                pre_match = text[:start_index].rstrip()
                 pre_match_number = re.search(r'(\d[\d\s]*[.,])?\d+\s*$', pre_match)
                 if pre_match_number:
                     amount = float(pre_match_number.group().replace(',', '.'))
                     start_index = pre_match_number.start()
 
             # Check if there is a number after the currency trigger
-            if amount is None and end_index < len(message):
-                post_match = message[end_index:].lstrip()
+            if amount is None and end_index < len(text):
+                post_match = text[end_index:].lstrip()
                 post_match_number = re.search(r'^\s*(\d[\d\s]*[.,])?\d+', post_match)
                 if post_match_number:
                     amount = float(post_match_number.group().replace(',', '.'))
@@ -54,7 +54,7 @@ def convert_currency(update: Update, context: CallbackContext):
     for currency_code, amount, start_index, end_index in matches:
         if (currency_code, amount) not in processed_amounts:
             processed_amounts.add((currency_code, amount))
-            rates = get_rates(currency_code)
+            rates = await get_rates(currency_code)
             if rates is not None:
                 response += f'{currency_emojis.get(currency_code, "")}{amount:.2f} {currency_code}:\n\n'
                 for currency in main_currencies:
@@ -66,7 +66,7 @@ def convert_currency(update: Update, context: CallbackContext):
     # Send response
     if response:
         response = response.replace('.', ',')
-        reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("Удалить", callback_data='delete')]])
-        update.message.reply_text(response.strip().rstrip('—————').strip(), reply_markup=reply_markup)
+        reply_markup = types.InlineKeyboardMarkup(inline_keyboard=[[types.InlineKeyboardButton("Удалить", callback_data='delete')]])
+        message = await message.answer(response.strip().rstrip('—————').strip(), reply_markup=reply_markup)
     else:
         return False

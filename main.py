@@ -1,9 +1,13 @@
-import re, requests
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Message
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler, BaseFilter
+import re, asyncio
+from aiogram import Bot, Dispatcher, types
+from aiogram.dispatcher.filters import Command, Text, ChatTypeFilter, IDFilter
+from aiogram.dispatcher import FSMContext
+from aiogram.types.chat import ChatType
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, ContentTypes
+from aiogram.utils import executor
 
-from handlers import *
 from static.tokens import *
+from handlers import *
 
 # A blank http page via aiohttp
 HTTP_SERVER=False
@@ -11,46 +15,26 @@ HTTP_SERVER=False
 if HTTP_SERVER:
     from keepalive import *
 
-def handle_callback(update: Update, context: CallbackContext):
-    query = update.callback_query
-    if query.data == 'delete':
-        query.message.delete()
+async def handle_callback(callback_query: CallbackQuery):
+    if callback_query.data == 'delete':
+        await callback_query.message.delete()
 
-class UserAndChannelFilter(BaseFilter):
-    def __init__(self, mode):
-        self.mode = mode
+async def main():
+    bot = Bot(token=TELEGRAM_TOKEN)
+    dp = Dispatcher(bot)
 
-    def __call__(self, update: Update):
-        if update.message is None:
-            return False
+    dp.message_handlers.once = False
+    dp.register_message_handler(alo, Command("alo"))
+    dp.register_message_handler(cum, Command("cum"))
+    dp.register_message_handler(stats, Command("stats"), ChatTypeFilter(chat_type=ChatType.PRIVATE) | IDFilter(chat_id=-1001474397357))
+    dp.register_message_handler(log_message, IDFilter(chat_id=-1001474397357), lambda message: not message.text.startswith('/'))
+    dp.register_message_handler(convert_currency, IDFilter(chat_id=-1001474397357))
+    dp.register_callback_query_handler(handle_callback, IDFilter(chat_id=-1001474397357))
 
-        chat = update.message.chat
-        user_id = str(update.message.from_user.id)
-
-        if self.mode == 0:
-            return chat.type != 'private' and chat.username == 'begoniacommunity'
-        elif self.mode == 1:
-            return chat.type == 'private' and user_id == '1010949968'
-        elif self.mode == 2:
-            return (chat.type == 'private' and user_id == '1010949968') or (chat.type != 'private' and chat.username == 'begoniacommunity')
-        else:
-            return False
-
-def main():
-    updater = Updater(TELEGRAM_TOKEN, use_context=True)
-
-    dp = updater.dispatcher
-    dp.add_handler(CommandHandler("alo", alo))
-    dp.add_handler(CommandHandler("cum", cum))
-    dp.add_handler(CommandHandler("stats", stats))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command & UserAndChannelFilter(2), convert_currency), group=0)
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command & UserAndChannelFilter(0), log_message), group=1)
-    dp.add_handler(CallbackQueryHandler(handle_callback))
-
-    updater.start_polling()
+    await dp.start_polling()
     if HTTP_SERVER:
         web.run_app(app)
-    updater.idle()
+    await dp.idle()
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

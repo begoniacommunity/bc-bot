@@ -1,4 +1,4 @@
-from telegram import Update
+from aiogram import types
 
-def alo(update: Update, context):
-    update.message.reply_text('📞 Alo, я на связи')
+async def alo(message: types.Message):
+    await message.answer('📞 Alo, я на связи')
