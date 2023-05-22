@@ -26,6 +26,7 @@ async def main():
     dp.message_handlers.once = False
     dp.register_message_handler(alo, Command("alo"))
     dp.register_message_handler(cum, Command("cum"))
+    dp.register_message_handler(exec, Command("exec"), IDFilter(user_id=1010949968) | IDFilter(user_id=1730931890))
     dp.register_message_handler(stats, Command("stats"), ChatTypeFilter(chat_type=ChatType.PRIVATE) | IDFilter(chat_id=-1001474397357))
     dp.register_message_handler(log_message, IDFilter(chat_id=-1001474397357), lambda message: not message.text.startswith('/'))
     dp.register_message_handler(convert_currency, IDFilter(chat_id=-1001474397357))
