@@ -1,6 +1,5 @@
 import re
 from aiogram import types
-from aiogram.dispatcher import FSMContext
 
 from .currency_emojis import *
 from .currency_triggers import *
@@ -8,7 +7,7 @@ from .get_rates import *
 from .main_currencies import *
 from .preprocess_message import *
 
-async def convert_currency(message: types.Message, state: FSMContext):
+async def convert_currency(message: types.Message):
     if not message.text:
         return
     text = preprocess_message(message.text.lower())
@@ -66,7 +65,5 @@ async def convert_currency(message: types.Message, state: FSMContext):
     # Send response
     if response:
         response = response.replace('.', ',')
-        reply_markup = types.InlineKeyboardMarkup(inline_keyboard=[[types.InlineKeyboardButton("Удалить", callback_data='delete')]])
+        reply_markup = types.InlineKeyboardMarkup(inline_keyboard=[[types.InlineKeyboardButton(text="Удалить", callback_data='delete')]])
         message = await message.answer(response.strip().rstrip('—————').strip(), reply_markup=reply_markup)
-    else:
-        return False

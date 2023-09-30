@@ -1,8 +1,7 @@
-import aiosqlite
-import asyncio
+import asyncio, aiosqlite
 
 async def create_table():
-    async with aiosqlite.connect('./static/msg_stats.db') as connect: # добавил async и with
+    async with aiosqlite.connect('./static/msg_stats.db') as connect:
         curs = await connect.cursor()
 
         await curs.execute('''

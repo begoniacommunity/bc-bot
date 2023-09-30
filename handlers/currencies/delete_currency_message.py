@@ -1,4 +1,5 @@
-from aiogram.types import CallbackQuery, ParseMode
+from aiogram.types import CallbackQuery
+from aiogram.enums import ParseMode
 
 async def delete_currency_message(call: CallbackQuery):
     if call.data == 'delete':
