@@ -1,5 +1,5 @@
 import re
-from aiogram import types
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from .currency_emojis import *
 from .currency_triggers import *
@@ -7,7 +7,7 @@ from .get_rates import *
 from .main_currencies import *
 from .preprocess_message import *
 
-async def convert_currency(message: types.Message):
+async def convert_currency(message: Message):
     if not message.text:
         return
     text = preprocess_message(message.text.lower())
@@ -65,5 +65,5 @@ async def convert_currency(message: types.Message):
     # Send response
     if response:
         response = response.replace('.', ',')
-        reply_markup = types.InlineKeyboardMarkup(inline_keyboard=[[types.InlineKeyboardButton(text="Удалить", callback_data='delete')]])
+        reply_markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Удалить", callback_data='delete')]])
         message = await message.answer(response.strip().rstrip('—————').strip(), reply_markup=reply_markup)
