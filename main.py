@@ -17,6 +17,7 @@ async def main():
 
     dp.message.register(alo, Command("alo"))
     dp.message.register(cum, Command("cum"))
+    dp.message.register(exchange, Command("exchange"), bcMessageFilter)
     dp.message.register(stats, Command("stats"))
     dp.callback_query.register(delete_currency_message, bcCallbackFilter)
 
