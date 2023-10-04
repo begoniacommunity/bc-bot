@@ -1,5 +1,5 @@
+from aiogram import html
 from aiogram.types import CallbackQuery
-from aiogram.enums import ParseMode
 
 async def delete_currency_message(call: CallbackQuery):
     if call.data == 'delete':
@@ -7,8 +7,7 @@ async def delete_currency_message(call: CallbackQuery):
         user_id = call.from_user.id
 
         await call.message.edit_text(
-            text=f"{call.message.text}\n\n\* удалил @{user_name} (`{user_id}`).",
-            parse_mode=ParseMode.MARKDOWN
+            text=f"{call.message.text}\n\n{html.bold('– удалил(-а)')} @{html.quote(user_name)} ({html.code(user_id)})."
         )
 
         await call.message.delete()
