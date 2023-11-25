@@ -140,7 +140,7 @@ currency_emojis = {
     'TOP': '🇹🇴',
     'TRY': '🇹🇷',
     'TTD': '🇹🇹',
-    'TVD': '💸',
+    'TVD': '🇹🇻',
     'TWD': '🇹🇼',
     'TZS': '🇹🇿',
     'UAH': '🇺🇦',
