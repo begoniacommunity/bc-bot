@@ -1,4 +1,4 @@
 asyncio~=3.4.3
-aiogram[fast]~=3.1.1
+aiogram[fast]~=3.2.0
 aiosqlite~=0.19.0
 beautifulsoup4~=4.12.2
