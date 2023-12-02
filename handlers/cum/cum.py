@@ -1,5 +1,5 @@
-from aiogram import types
+from aiogram.types import Message
 
 
-async def cum(message: types.Message) -> None:
+async def cum(message: Message) -> None:
     await message.answer('🍆💦')
