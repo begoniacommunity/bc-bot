@@ -64,6 +64,7 @@ async def convert_currency(message: Message):
 
     # Send response
     if response:
+        response = re.sub(r"(?<=\d)(?=(?:\d{3})+(?:\.\d+))", " ", response)
         response = response.replace('.', ',')
         reply_markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Удалить", callback_data='delete')]])
         message = await message.answer(response.strip().rstrip('—————').strip(), reply_markup=reply_markup)
