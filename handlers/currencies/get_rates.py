@@ -5,7 +5,8 @@ from main import EXCHANGERATES_TOKEN
 
 cache = {}
 
-async def get_rates(base_currency):
+
+async def get_rates(base_currency: str) -> None:
     now = datetime.now()
     if base_currency in cache:
         rates, timestamp = cache[base_currency]
@@ -22,5 +23,7 @@ async def get_rates(base_currency):
                     cache[base_currency] = (rates, now)
                     return rates
             else:
-                print(f'ERROR: Failed to get rates for {base_currency}. Status code: {response.status}')
+                print(
+                    f'ERROR: Failed to get rates for {base_currency}. Status code: {response.status}'
+                )
     return None

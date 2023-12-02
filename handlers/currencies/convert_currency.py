@@ -6,13 +6,22 @@ from .currency_triggers import *
 from .get_rates import *
 from .main_currencies import *
 
+
 def preprocess_message(message: str) -> str:
     message = re.sub(r"@(\S+)", "", message)
-    message = re.sub(r"\b(?:https?:\/\/|www\.)\S+\b|\b\S+\.com\S*\b", "", message)
-    message = re.sub(r"(?<!\d)(\d{1,3}(?: \d{3})*(?:\.\d+)?)(?=(?:\s\d{3})*(?:\.\d+)?|\D|$)", lambda match: match.group(1).replace(" ", ""), message)
+    message = re.sub(
+        r"\b(?:https?:\/\/|www\.)\S+\b|\b\S+\.com\S*\b", "", message,
+    )
+    message = re.sub(
+        r"(?<!\d)(\d{1,3}(?: \d{3})*(?:\.\d+)?)(?=(?:\s\d{3})*(?:\.\d+)?|\D|$)",
+        lambda match: match.group(1).replace(" ", ""),
+        message,
+    )
+
     return message
 
-async def convert_currency(message: Message):
+
+async def convert_currency(message: Message) -> None:
     if not message.text:
         return
     text = preprocess_message(message.text.lower())
@@ -20,12 +29,14 @@ async def convert_currency(message: Message):
     processed_amounts = set()
 
     # Sort currency triggers by the number of words in descending order
-    sorted_triggers = sorted(currency_triggers.items(), key=lambda x: -len(x[0]))
+    sorted_triggers = sorted(currency_triggers.items(),
+                             key=lambda x: -len(x[0]))
 
     # Find all matches of currency triggers in the message
     matches = []
     for trigger_words, currency_code in sorted_triggers:
-        trigger_regex = r'\s*'.join([re.escape(word) for word in trigger_words])
+        trigger_regex = r'\s*'.join([re.escape(word)
+                                    for word in trigger_words])
         for match in re.finditer(trigger_regex, text):
             start_index = match.start()
             end_index = match.end()
@@ -34,7 +45,8 @@ async def convert_currency(message: Message):
             # Check if there is a number before the currency trigger
             if start_index > 0:
                 pre_match = text[:start_index].rstrip()
-                pre_match_number = re.search(r'(\d[\d\s]*[.,])?\d+\s*$', pre_match)
+                pre_match_number = re.search(
+                    r'(\d[\d\s]*[.,])?\d+\s*$', pre_match)
                 if pre_match_number:
                     amount = float(pre_match_number.group().replace(',', '.'))
                     start_index = pre_match_number.start()
@@ -42,7 +54,8 @@ async def convert_currency(message: Message):
             # Check if there is a number after the currency trigger
             if amount is None and end_index < len(text):
                 post_match = text[end_index:].lstrip()
-                post_match_number = re.search(r'^\s*(\d[\d\s]*[.,])?\d+', post_match)
+                post_match_number = re.search(
+                    r'^\s*(\d[\d\s]*[.,])?\d+', post_match)
                 if post_match_number:
                     amount = float(post_match_number.group().replace(',', '.'))
                     end_index += post_match_number.end()
@@ -71,5 +84,12 @@ async def convert_currency(message: Message):
     if response:
         response = re.sub(r"(?<=\d)(?=(?:\d{3})+(?:\.\d+))", " ", response)
         response = response.replace('.', ',')
-        reply_markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Удалить", callback_data='delete')]])
-        message = await message.answer(response.strip().rstrip('—————').strip(), reply_markup=reply_markup)
+        reply_markup = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="Удалить", callback_data='delete')],
+            ]
+        )
+        message = await message.answer(
+            response.strip().rstrip('—————').strip(),
+            reply_markup=reply_markup,
+        )
