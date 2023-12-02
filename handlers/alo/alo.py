@@ -1,5 +1,5 @@
-from aiogram import types
+from aiogram.types import Message
 
 
-async def alo(message: types.Message) -> None:
+async def alo(message: Message) -> None:
     await message.answer('📞 Alo, я на связи')
