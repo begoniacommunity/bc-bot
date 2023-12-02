@@ -1,3 +1,4 @@
+import re
 import aiohttp
 from aiogram import html
 from aiogram.types import Message
@@ -67,9 +68,12 @@ async def exchange(message: Message, command: CommandObject):
         await msg.edit_text(result)
 
 def parse(rate: str) -> str:
-    # Strip to two decimal places
-    rate = '{:.2f}'.format(float(rate))
+    # Remove thousands separators and strip to two decimal places
+    rate = rate.replace(',', '')         # 12,345.9876 -> 12345.9876
+    rate = '{:.2f}'.format(float(rate))  # 12345.9876 -> 12345.99
+
     # Convert to russian formatting standard
-    rate = rate.replace(',', ' ').replace('.', ',')
+    rate = re.sub(r"(?<=\d)(?=(?:\d{3})+(?:\.\d+))", " ", rate)  # 12345.99 -> 12 345.99
+    rate = rate.replace('.', ',')                                # 12 345.99 -> 12 345,99
 
     return rate
