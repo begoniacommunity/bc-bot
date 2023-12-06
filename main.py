@@ -7,11 +7,13 @@ from aiogram.types import Message
 from static.tokens import *
 from handlers import *
 
+bcID = -1001474397357
+
+
 async def main():
     bot = Bot(TELEGRAM_TOKEN, parse_mode=ParseMode.HTML)
     dp = Dispatcher()
 
-    bcID = -1001474397357
     bcMessageFilter = F.chat.id == bcID
     bcCallbackFilter = F.message.chat.id == bcID
 
