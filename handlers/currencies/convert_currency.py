@@ -1,7 +1,6 @@
-import re
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
-from .currency_emojis import *
+from shared.currency_emojis import *
 from .currency_triggers import *
 from .get_rates import *
 from .main_currencies import *

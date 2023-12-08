@@ -3,3 +3,7 @@ __pycache__
 
 # A folder that is used for specific private & static stuff, such as databases, tokens, etc.
 static
+
+# IDE and dev envinment files
+venv
+.idea
