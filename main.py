@@ -22,11 +22,17 @@ async def main():
     dp.message.register(cum, Command("cum"))
     dp.message.register(exchange, Command("exchange"), bcMessageFilter)
     dp.message.register(stats, Command("stats"))
-    dp.callback_query.register(stats_callback)
-    dp.callback_query.register(delete_currency_message, bcCallbackFilter)
+
+    @dp.callback_query(F.data.in_({'back', 'week', 'month'}))
+    async def stats_callback_(call: CallbackQuery) -> None:
+        await stats_callback(call)
+
+    @dp.callback_query(bcCallbackFilter & F.data == "delete")
+    async def delete_currency_message_(call: CallbackQuery) -> None:
+        await delete_currency_message(call)
 
     @dp.message(bcMessageFilter)
-    async def non_command(message: Message):
+    async def non_command(message: Message) -> None:
         await log_message(message)
         await convert_currency(message)
 
