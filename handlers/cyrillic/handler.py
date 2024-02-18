@@ -16,11 +16,11 @@ allowed_detector_letters = [key for key in english_to_cyrillic.keys()]
 logger.debug("Loading model...")
 start = time.perf_counter()
 try:
-    model_data = pickle.load(open('handlers/cyrillic/markov/gib_model.pki', 'rb'))
+    model_data = pickle.load(open('static/gib_model.pki', 'rb'))
 except FileNotFoundError:
     logger.error("Model file not found.")
-    logger.info("Please run model_trainer.py *from its own folder* to generate the model file")
-    logger.info("Model file should be at handlers/cyrillic/markov/gib_model.pki")
+    logger.info("Please run model_trainer.py (located at ./handlers/cyrillic/markov) to generate the model file")
+    logger.info("Model file should be at static/gib_model.pki")
     exit(1)
 model_mat = model_data['mat']
 threshold = model_data['thresh']
