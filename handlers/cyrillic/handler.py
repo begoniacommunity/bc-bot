@@ -1,9 +1,9 @@
 import time
-from .markov import *
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from main import botID
 import pickle
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from loguru import logger
+from main import botID
+from .markov import avg_transition_prob
 
 english_to_cyrillic = {
     "q": "й", "w": "ц", "e": "у", "r": "к", "t": "е", "y": "н", "u": "г", "i": "ш", "o": "щ", "p": "з", "[": "х",
@@ -31,15 +31,12 @@ del start, end
 
 def gibberish_detector(text: str) -> bool:
     """Detects if a text is gibberish
-    Returns... True? if text is valid, false if text is gibberish
-    UPD: I'm not sure if this is correct, but I'm too lazy to check
-    """
+    Returns false if text is valid, true if text is gibberish"""
     return avg_transition_prob(text, model_mat) < threshold
 
 
 async def cyrillic_processor(message: Message, being_called_from_autodetect: bool = False):
-    """Converts US/English characters to cyrillic characters. Meant for use when a user has used
-    a wrong keyboard layout"""
+    """Converts Latin characters to cyrillic characters."""
     if not message.reply_to_message and not being_called_from_autodetect:
         await message.reply("Используйте эту команду ответом на целевые сообщения")
         return
