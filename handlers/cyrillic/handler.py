@@ -50,17 +50,12 @@ async def cyrillic_processor(message: Message, being_called_from_autodetect: boo
     else:
         target_message = message
 
-    result = "Перевод: "
-    errored = False
+    result = ""
     for character in target_message.text:
         try:
             result += english_to_cyrillic[character.lower()]
         except KeyError:
             result += character
-            errored = True
-
-    if errored:
-        result.replace("Перевод: ", "Частичный перевод: ")
 
     reply_markup = InlineKeyboardMarkup(
         inline_keyboard=[
