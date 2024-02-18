@@ -35,6 +35,7 @@ async def main():
     async def non_command(message: Message) -> None:
         await log_message(message)
         await convert_currency(message)
+        await wrong_layout_detector(message)
 
     # Schedule removing old stats database records
     scheduler = AsyncIOScheduler()

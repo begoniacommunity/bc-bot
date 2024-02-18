@@ -1,0 +1,81 @@
+import time
+from .markov import *
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from main import botID
+import pickle
+from loguru import logger
+
+english_to_cyrillic = {
+    "q": "й", "w": "ц", "e": "у", "r": "к", "t": "е", "y": "н", "u": "г", "i": "ш", "o": "щ", "p": "з", "[": "х",
+    "]": "ъ", "a": "ф", "s": "ы", "d": "в", "f": "а", "g": "п", "h": "р", "j": "о", "k": "л", "l": "д", ";": "ж",
+    "'": "э", "z": "я", "x": "ч", "c": "с", "v": "м", "b": "и", "n": "т", "m": "ь", ",": "б", ".": "ю", "/": ".",
+    " ": " "
+}
+allowed_detector_letters = [key for key in english_to_cyrillic.keys()]
+
+logger.debug("Loading model...")
+start = time.perf_counter()
+try:
+    model_data = pickle.load(open('handlers/cyrillic/markov/gib_model.pki', 'rb'))
+except FileNotFoundError:
+    logger.error("Model file not found.")
+    logger.info("Please run model_trainer.py *from its own folder* to generate the model file")
+    logger.info("Model file should be at handlers/cyrillic/markov/gib_model.pki")
+    exit(1)
+model_mat = model_data['mat']
+threshold = model_data['thresh']
+end = time.perf_counter()
+logger.debug(f"Model loaded in {end - start} seconds")
+del start, end
+
+
+def gibberish_detector(text: str) -> bool:
+    """Detects if a text is gibberish
+    Returns... True? if text is valid, false if text is gibberish
+    UPD: I'm not sure if this is correct, but I'm too lazy to check
+    """
+    return avg_transition_prob(text, model_mat) < threshold
+
+
+async def cyrillic_processor(message: Message, being_called_from_autodetect: bool = False):
+    """Converts US/English characters to cyrillic characters. Meant for use when a user has used
+    a wrong keyboard layout"""
+    if not message.reply_to_message and not being_called_from_autodetect:
+        await message.reply("Используйте эту команду ответом на целевые сообщения")
+        return
+
+    if not being_called_from_autodetect:
+        target_message = message.reply_to_message
+        if target_message.from_user.id == botID:
+            await message.reply("Ты совсем ебобо?")
+            return
+    else:
+        target_message = message
+
+    result = "Перевод: "
+    errored = False
+    for character in target_message.text:
+        try:
+            result += english_to_cyrillic[character.lower()]
+        except KeyError:
+            result += character
+            errored = True
+
+    if errored:
+        result.replace("Перевод: ", "Частичный перевод: ")
+
+    reply_markup = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Удалить", callback_data='delete')],
+        ]
+    )
+    await target_message.reply(result, reply_markup=reply_markup)
+
+
+async def wrong_layout_detector(message: Message):
+    """Detects if a message is likely to have been typed with a wrong layout"""
+    for letter in message.text:
+        if letter.lower() not in allowed_detector_letters:
+            return
+    if gibberish_detector(message.text):
+        await cyrillic_processor(message, True)
