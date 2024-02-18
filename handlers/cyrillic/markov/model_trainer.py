@@ -4,6 +4,7 @@
 
 import math
 import pickle
+from loguru import logger
 
 accepted_chars = 'abcdefghijklmnopqrstuvwxyz '
 
@@ -68,7 +69,7 @@ def train():
 
     # And pick a threshold halfway between the worst good and best bad inputs.
     thresh = (min(good_probs) + max(bad_probs)) / 2
-    pickle.dump({'mat': counts, 'thresh': thresh}, open('gib_model.pki', 'wb'))
+    pickle.dump({'mat': counts, 'thresh': thresh}, open('static/gib_model.pki', 'wb'))
 
 
 def avg_transition_prob(l, log_prob_mat):
@@ -81,5 +82,7 @@ def avg_transition_prob(l, log_prob_mat):
     # The exponentiation translates from log probs to probs.
     return math.exp(log_prob / (transition_ct or 1))
 
+
 if __name__ == '__main__':
+    logger.warning("Running standalone, expect errors related to model save path!")
     train()

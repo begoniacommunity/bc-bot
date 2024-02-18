@@ -3,7 +3,7 @@ import pickle
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from loguru import logger
 from main import botID
-from .markov import avg_transition_prob
+from .markov import avg_transition_prob, train
 
 english_to_cyrillic = {
     "q": "й", "w": "ц", "e": "у", "r": "к", "t": "е", "y": "н", "u": "г", "i": "ш", "o": "щ", "p": "з", "[": "х",
@@ -20,9 +20,18 @@ try:
         model_data = pickle.load(model_file)
 except FileNotFoundError:
     logger.error("Model file not found.")
-    logger.info("Please run model_trainer.py (located at ./handlers/cyrillic/markov) to generate the model file")
-    logger.info("Model file should be at static/gib_model.pki")
-    exit(1)
+    logger.info("Attempting to train automatically...")
+    try:
+        train()
+        logger.success("Trained successfully.")
+        with open('static/gib_model.pki', 'rb') as model_file:
+            model_data = pickle.load(model_file)
+        exit(0)
+    except Exception:
+        logger.error("Failed to train/load automatically. Please refer to ./handlers/cyrillic/markov/model_trainer.py "
+                     "for more information.")
+        exit(1)
+
 model_mat = model_data['mat']
 threshold = model_data['thresh']
 end = time.perf_counter()
