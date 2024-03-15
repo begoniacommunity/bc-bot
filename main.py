@@ -1,4 +1,5 @@
 from aiogram import Bot, Dispatcher, F
+from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -11,7 +12,10 @@ bcID = -1001474397357
 bcMessageFilter = F.chat.id == bcID
 bcCallbackFilter = F.message.chat.id == bcID
 
-bot = Bot(TELEGRAM_TOKEN, parse_mode=ParseMode.HTML)
+bot = Bot(
+    TELEGRAM_TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+)
 dp = Dispatcher()
 
 scheduler = AsyncIOScheduler()
