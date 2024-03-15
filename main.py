@@ -8,15 +8,16 @@ from static.tokens import *
 from handlers import *
 
 bcID = -1001474397357
+bcMessageFilter = F.chat.id == bcID
+bcCallbackFilter = F.message.chat.id == bcID
+
+bot = Bot(TELEGRAM_TOKEN, parse_mode=ParseMode.HTML)
+dp = Dispatcher()
+
+scheduler = AsyncIOScheduler()
 
 
 async def main():
-    bot = Bot(TELEGRAM_TOKEN, parse_mode=ParseMode.HTML)
-    dp = Dispatcher()
-
-    bcMessageFilter = F.chat.id == bcID
-    bcCallbackFilter = F.message.chat.id == bcID
-
     dp.message.register(alo, Command("alo"))
     dp.message.register(cum, Command("cum"))
     dp.message.register(exchange, Command("exchange"), bcMessageFilter)
@@ -37,7 +38,6 @@ async def main():
         await convert_currency(message)
 
     # Schedule removing old stats database records
-    scheduler = AsyncIOScheduler()
     scheduler.add_job(delete_old_records, trigger="interval", days=1)
     scheduler.start()
 
