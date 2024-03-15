@@ -1,1 +1,1 @@
-main_currencies = ['RUB', 'UAH', 'USD', 'EUR']
+main_currencies = ['RUB', 'UAH', 'BYN', 'KZT', 'USD', 'EUR']
