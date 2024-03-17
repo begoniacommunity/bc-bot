@@ -1,46 +1,42 @@
-import aiosqlite
-import asyncio
 from datetime import datetime, timedelta
 
+import aiosqlite
 
-# Create an new database if not exists
-async def create_table() -> None:
-    async with aiosqlite.connect('./static/msg_stats.db') as connect:
-        curs = await connect.cursor()
 
-        await curs.execute('''
-            CREATE TABLE IF NOT EXISTS messages (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                timestamp TEXT
+class StatsCron:
+    def __init__(self):
+        pass
+
+    async def create_database(self) -> None:
+        """Create database if not exists."""
+        async with aiosqlite.connect('./static/msg_stats.db') as db:
+            await db.execute('''
+                CREATE TABLE IF NOT EXISTS messages (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    timestamp TEXT
+                )
+            ''')
+            await db.commit()
+
+    async def delete_old_records(self) -> None:
+        """Remove database records older than one month."""
+        month_ago = datetime.now() - timedelta(days=30)
+        date_str = month_ago.strftime('%Y-%m-%d %H:%M:%S')
+
+        async with aiosqlite.connect('./static/msg_stats.db') as db:
+            await db.execute('''
+                DELETE FROM messages
+                WHERE timestamp < ?
+            ''', (date_str,)
             )
-        ''')
-        await connect.commit()
+            await db.commit()
 
-        await curs.close()
+            await db.execute('''
+                VACUUM
+            ''')
+            await db.commit()
 
-
-# Remove old stats database records
-async def delete_old_records() -> None:
-    month_ago = datetime.now() - timedelta(days=30)
-    date_str = month_ago.strftime("%Y-%m-%d")
-
-    async with aiosqlite.connect('./static/msg_stats.db') as connect:
-        curs = await connect.cursor()
-
-        await curs.execute('''
-            DELETE FROM messages
-            WHERE timestamp < ?
-        ''', (date_str,)
-        )
-        await connect.commit()
-
-        await curs.execute('''
-            VACUUM
-        ''')
-        await connect.commit()
-
-        await curs.close()
-
-asyncio.run(create_table())
-asyncio.run(delete_old_records())
+    async def run(self) -> None:
+        await self.create_database()
+        await self.delete_old_records()

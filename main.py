@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -5,8 +7,8 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from static.tokens import *
 from handlers import *
+from static.tokens import *
 
 bcID = -1001474397357
 bcMessageFilter = F.chat.id == bcID
@@ -14,7 +16,7 @@ bcCallbackFilter = F.message.chat.id == bcID
 
 bot = Bot(
     TELEGRAM_TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML),
 )
 dp = Dispatcher()
 
@@ -33,7 +35,7 @@ async def main():
     async def stats_callback_(call: CallbackQuery) -> None:
         await stats_callback(call)
 
-    @dp.callback_query(bcCallbackFilter & F.data == "delete")
+    @dp.callback_query(bcCallbackFilter & F.data == 'delete')
     async def delete_currency_message_(call: CallbackQuery) -> None:
         await delete_currency_message(call)
 
@@ -42,12 +44,18 @@ async def main():
         await log_message(message)
         await convert_currency(message)
 
-    # Schedule removing old stats database records
-    scheduler.add_job(delete_old_records, trigger="interval", days=1)
-    scheduler.start()
-
     reminders_cron = RemindersCron()
     await reminders_cron.run()
+
+    stats_cron = StatsCron()
+    await stats_cron.run()
+    scheduler.add_job(
+        stats_cron.run,
+        trigger='interval',
+        days=1,
+    )
+
+    scheduler.start()
 
     await dp.start_polling(bot)
 
