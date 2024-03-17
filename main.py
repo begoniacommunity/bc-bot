@@ -3,7 +3,7 @@ import asyncio
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -24,6 +24,9 @@ scheduler = AsyncIOScheduler()
 
 
 async def main():
+    dp.message.register(start, CommandStart(), bcMessageFilter)
+    dp.message.register(start, Command("help"), bcMessageFilter)
+
     dp.message.register(alo, Command("alo"))
     dp.message.register(cum, Command("cum"))
     dp.message.register(exchange, Command("exchange"), bcMessageFilter)
