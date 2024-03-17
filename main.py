@@ -26,6 +26,7 @@ async def main():
     dp.message.register(cum, Command("cum"))
     dp.message.register(exchange, Command("exchange"), bcMessageFilter)
     dp.message.register(layout_command, Command("layout"), bcMessageFilter)
+    dp.message.register(remind_command, Command("remind"), bcMessageFilter)
     dp.message.register(stats, Command("stats"))
 
     @dp.callback_query(F.data.in_({'back', 'week', 'month'}))
@@ -44,6 +45,9 @@ async def main():
     # Schedule removing old stats database records
     scheduler.add_job(delete_old_records, trigger="interval", days=1)
     scheduler.start()
+
+    reminders_cron = RemindersCron()
+    await reminders_cron.run()
 
     await dp.start_polling(bot)
 
