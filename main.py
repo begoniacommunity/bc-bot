@@ -29,9 +29,9 @@ async def main():
     dp.message.register(exchange, Command("exchange"), bcMessageFilter)
     dp.message.register(layout_command, Command("layout"), bcMessageFilter)
     dp.message.register(remind_command, Command("remind"), bcMessageFilter)
-    dp.message.register(stats, Command("stats"), bcMessageFilter)
+    dp.message.register(stats_command, Command("stats"), bcMessageFilter)
 
-    @dp.callback_query(F.data.in_({'back', 'week', 'month'}) & bcCallbackFilter)
+    @dp.callback_query(F.data.in_({'day', 'week', 'month'}) & bcCallbackFilter)
     async def stats_callback_(call: CallbackQuery) -> None:
         await stats_callback(call)
 
@@ -41,7 +41,8 @@ async def main():
 
     @dp.message(bcMessageFilter)
     async def non_command(message: Message) -> None:
-        await log_message(message)
+        stats = Stats()
+        await stats.log(message)
         await convert_currency(message)
 
     reminders_cron = RemindersCron()

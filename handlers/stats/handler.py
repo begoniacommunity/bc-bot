@@ -3,20 +3,21 @@ import re
 from aiogram import html
 from aiogram.types import CallbackQuery, Message
 
-from .process_message import *
+from .stats import Stats
 
 
-async def stats(message: Message) -> None:
+async def stats_command(message: Message) -> None:
     wait_msg = await message.answer(
         html.bold("🔄 Обработка данных...")
     )
 
-    result = await process_message(message, None)
-    stats = "".join(result[0])
-    reply_markup = result[1]
+    stats = Stats()
+    stats = await stats.get(message, None)
+    msg = "".join(stats[0])
+    reply_markup = stats[1]
 
     await wait_msg.edit_text(
-        stats,
+        msg,
         reply_markup=reply_markup,
     )
 
@@ -36,21 +37,21 @@ async def stats_callback(call: CallbackQuery) -> None:
         wait_msg,
     )
     wait_msg = re.sub(
-        r"Всего сообщений – \d+",
-        html.bold("Всего сообщений – ?"),
+        r"Всего сообщений — \d+",
+        html.bold("Всего сообщений — ?"),
         wait_msg,
     )
 
     await call.message.edit_text(
         wait_msg,
-        reply_markup=reply_markup,
     )
 
-    result = await process_message(None, call)
-    stats = "".join(result[0])
-    reply_markup = result[1]
+    stats = Stats()
+    stats = await stats.get(None, call)
+    msg = "".join(stats[0])
+    reply_markup = stats[1]
 
     await call.message.edit_text(
-        stats,
+        msg,
         reply_markup=reply_markup,
     )
