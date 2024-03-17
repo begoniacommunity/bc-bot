@@ -29,9 +29,9 @@ async def main():
     dp.message.register(exchange, Command("exchange"), bcMessageFilter)
     dp.message.register(layout_command, Command("layout"), bcMessageFilter)
     dp.message.register(remind_command, Command("remind"), bcMessageFilter)
-    dp.message.register(stats, Command("stats"))
+    dp.message.register(stats, Command("stats"), bcMessageFilter)
 
-    @dp.callback_query(F.data.in_({'back', 'week', 'month'}))
+    @dp.callback_query(F.data.in_({'back', 'week', 'month'}) & bcCallbackFilter)
     async def stats_callback_(call: CallbackQuery) -> None:
         await stats_callback(call)
 
