@@ -1,3 +1,5 @@
+import traceback
+
 from aiogram import html
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
@@ -9,6 +11,7 @@ async def pidorstats(message: Message) -> None:
     try:
         stats = await db.get_pidor_usage_stats(message.chat.id)
     except Exception:
+        traceback.print_exc()
         stats = None
 
     if not stats:
