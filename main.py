@@ -41,6 +41,7 @@ async def main():
     dp.message.register(stats_command, Command("stats"), message_filter)
     dp.message.register(pidor, Command("pidor"), message_filter)
     dp.message.register(pidoreg, Command("pidoreg"), message_filter)
+    dp.message.register(pidorstats, Command("pidorstats"), message_filter)
 
     @dp.callback_query(F.data.in_({'day', 'week', 'month'}) & callback_filter)
     async def stats_callback_(call: CallbackQuery) -> None:

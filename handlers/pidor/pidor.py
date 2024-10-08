@@ -72,4 +72,4 @@ async def pidor(message: Message) -> None:
     await asyncio.sleep(3)
     await message.answer(random.choice(FINAL_STRINGS) + mention)
 
-    await db.mark_as_used_pidor(message.chat.id)
+    await db.mark_as_used_pidor(message.chat.id, pidor_id)
