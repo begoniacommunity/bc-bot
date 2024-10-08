@@ -35,6 +35,17 @@ async def pidorstats(message: Message) -> None:
 
     text = "<b>Статистика пидоров за последний год:</b>\n"
     for entry in stats:
-        text += html.bold(await get_username(entry['user_id'])) + " - " + html.italic(entry['number_of_occurrences'])
+        ends = [2, 3, 4]
+        should_add_a = False
+        for end in ends:
+            if str(entry['number_of_occurrences']).endswith(str(end)):
+                should_add_a = True
+
+        text += (html.bold(
+            await get_username(entry['user_id'])) +
+                 " - " +
+                 html.italic(entry['number_of_occurrences']) +
+                 html.italic(" раза" if should_add_a else " раз")
+                 )
 
     await message.answer(text)
