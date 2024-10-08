@@ -91,22 +91,17 @@ async def can_use_pidor(chat_id: int) -> bool:
 
 
 async def get_pidor_usage_stats(chat_id: int) -> List[dict]:
-    """Retrieve pidor usage stats for the last calendar year, sorted by occurrence."""
-    current_year = datetime.datetime.now().year
-    last_year_start = datetime.datetime(current_year - 1, 1, 1)
-    last_year_end = datetime.datetime(current_year, 1, 1)  # January 1st of the current year
-
-    start_timestamp = int(last_year_start.timestamp())
-    end_timestamp = int(last_year_end.timestamp())
+    """Retrieve pidor usage stats for the last year, sorted by occurrence."""
+    one_year_ago = int((datetime.datetime.now() - datetime.timedelta(days=365)).timestamp())
 
     async with aiosqlite.connect('./data/pidors.db') as db:
         cursor = await db.execute("""
             SELECT outcome, COUNT(outcome) as occurrences 
             FROM pidor_uses 
-            WHERE chat_id = ? AND timestamp >= ? AND timestamp < ?
+            WHERE chat_id = ? AND timestamp >= ?
             GROUP BY outcome 
             ORDER BY occurrences DESC
-        """, (chat_id, start_timestamp, end_timestamp))
+        """, (chat_id, one_year_ago))
         results = await cursor.fetchall()
 
     return [{'user_id': row[0], 'number_of_occurrences': row[1]} for row in results]
