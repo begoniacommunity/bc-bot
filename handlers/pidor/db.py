@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Tuple
 
 import aiosqlite
 
@@ -74,20 +74,20 @@ async def mark_as_used_pidor(chat_id: int, outcome_user_id: int) -> None:
         await db.commit()
 
 
-async def can_use_pidor(chat_id: int) -> bool:
+async def get_todays_pidor(chat_id: int) -> Tuple[int] or None:
     """Check if the pidor can be used again for the given chat_id."""
     current_timestamp = int(datetime.datetime.now().timestamp())
     one_day_ago = current_timestamp - 86400  # 24 hours in seconds
 
     async with aiosqlite.connect('./data/pidors.db') as db:
         cursor = await db.execute("""
-            SELECT timestamp FROM pidor_uses 
+            SELECT outcome FROM pidor_uses 
             WHERE chat_id = ? AND timestamp > ? 
             ORDER BY timestamp DESC LIMIT 1
         """, (chat_id, one_day_ago))
         result = await cursor.fetchone()
 
-    return result is None
+    return result
 
 
 async def get_pidor_usage_stats(chat_id: int) -> List[dict]:

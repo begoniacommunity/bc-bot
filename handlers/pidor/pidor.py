@@ -39,15 +39,15 @@ FINAL_STRINGS = [
 
 
 async def pidor(message: Message) -> None:
-    if not await db.can_use_pidor(message.chat.id):
-        await message.reply("<b>Искать пидора можно только раз в день!</b>")
-        return
-
     pidors = await db.get_pidors(message.chat.id)
     if not pidors:
         await message.reply("<b>Никто не зарегистрирован в игре. Зарегистрироваться -</b> /pidoreg")
         return
     pidor_id = random.choice(pidors)
+
+    check_result = await db.get_todays_pidor(message.chat.id)
+    if check_result:
+        pidor_id = check_result[0]
 
     try:
         member = await message.bot.get_chat_member(message.chat.id, pidor_id)
@@ -64,12 +64,15 @@ async def pidor(message: Message) -> None:
         except NameError:  # User does not have a username
             mention = f'<a href="tg://user?id={pidor_id}">{name}</a>'
 
-    await message.answer(random.choice(BEGINNING_STRINGS))
-    await asyncio.sleep(3)
-    await message.answer(random.choice(PROCESS_STRINGS))
-    await asyncio.sleep(3)
-    await message.answer(random.choice(PROCESS_STRINGS))
-    await asyncio.sleep(3)
-    await message.answer(random.choice(FINAL_STRINGS) + mention)
+    if not check_result:
+        await message.answer(random.choice(BEGINNING_STRINGS))
+        await asyncio.sleep(3)
+        await message.answer(random.choice(PROCESS_STRINGS))
+        await asyncio.sleep(3)
+        await message.answer(random.choice(PROCESS_STRINGS))
+        await asyncio.sleep(3)
+        await message.answer(random.choice(FINAL_STRINGS) + mention)
 
-    await db.mark_as_used_pidor(message.chat.id, pidor_id)
+        await db.mark_as_used_pidor(message.chat.id, pidor_id)
+    else:
+        await message.reply(f"<b>Сегодняшний пидор - {mention}</b>")
