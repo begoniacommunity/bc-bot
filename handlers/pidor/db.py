@@ -91,8 +91,10 @@ async def get_todays_pidor(chat_id: int) -> Tuple[int] or None:
 
 
 async def get_pidor_usage_stats(chat_id: int) -> List[dict]:
-    """Retrieve pidor usage stats for the last year, sorted by occurrence."""
-    one_year_ago = int((datetime.datetime.now() - datetime.timedelta(days=365)).timestamp())
+    """Retrieve pidor usage stats for the current year, sorted by occurrence."""
+    now = datetime.datetime.now()
+    start_of_year = datetime.datetime(now.year, 1, 1)
+    start_timestamp = int(start_of_year.timestamp())
 
     async with aiosqlite.connect('./data/pidors.db') as db:
         cursor = await db.execute("""
@@ -101,7 +103,7 @@ async def get_pidor_usage_stats(chat_id: int) -> List[dict]:
             WHERE chat_id = ? AND timestamp >= ?
             GROUP BY outcome 
             ORDER BY occurrences DESC
-        """, (chat_id, one_year_ago))
+        """, (chat_id, start_timestamp))
         results = await cursor.fetchall()
 
     return [{'user_id': row[0], 'number_of_occurrences': row[1]} for row in results]
