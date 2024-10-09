@@ -7,7 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 
 from handlers.pidor import db
-from handlers.pidor.rus_util import format_russian_date, format_timedelta_ru
+from handlers.pidor.rus_util import format_timedelta_ru
 
 BEGINNING_STRINGS = [
     "Эй, зачем разбудили...",
@@ -67,9 +67,7 @@ async def pidor(message: Message) -> None:
         if time_left_seconds > 0:
             # Cooldown has not expired yet
             time_left_delta = datetime.timedelta(seconds=time_left_seconds)
-            next_allowed_datetime = datetime.datetime.fromtimestamp(next_allowed_timestamp)
             formatted_time_left = format_timedelta_ru(time_left_delta)
-            formatted_date = format_russian_date(next_allowed_datetime)
 
             try:
                 member = await message.bot.get_chat_member(message.chat.id, pidor_id)
@@ -88,7 +86,7 @@ async def pidor(message: Message) -> None:
 
             await message.reply(
                 f"<b>Сегодняшний пидор</b> - {mention.replace('@', '')}\n"
-                f"Нового пидора можно будет выбрать с {formatted_date} (через {formatted_time_left})"
+                f"Нового пидора можно будет выбрать через {formatted_time_left}"
             )
             return
 
