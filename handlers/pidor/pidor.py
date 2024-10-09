@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import random
 
 from aiogram import html
@@ -6,6 +7,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message
 
 from handlers.pidor import db
+from handlers.pidor.rus_util import format_russian_date, format_timedelta_ru
 
 BEGINNING_STRINGS = [
     "Эй, зачем разбудили...",
@@ -55,15 +57,46 @@ FINAL_STRINGS = [
 
 
 async def pidor(message: Message) -> None:
+    check_result = await db.get_todays_pidor(message.chat.id)
+    if check_result:
+        pidor_id, last_timestamp = check_result
+        next_allowed_timestamp = last_timestamp + 86400
+        current_timestamp = int(datetime.datetime.now().timestamp())
+        time_left_seconds = next_allowed_timestamp - current_timestamp
+
+        if time_left_seconds > 0:
+            # Cooldown has not expired yet
+            time_left_delta = datetime.timedelta(seconds=time_left_seconds)
+            next_allowed_datetime = datetime.datetime.fromtimestamp(next_allowed_timestamp)
+            formatted_time_left = format_timedelta_ru(time_left_delta)
+            formatted_date = format_russian_date(next_allowed_datetime)
+
+            try:
+                member = await message.bot.get_chat_member(message.chat.id, pidor_id)
+                if member.user.username is not None:
+                    name = html.quote(member.user.username)
+                    mention = f"@{html.quote(name)}"
+                else:
+                    name = html.quote(member.user.first_name)
+            except TelegramBadRequest:
+                name = pidor_id  # In worst case, use the user_id
+            finally:
+                try:
+                    mention
+                except NameError:  # User does not have a username
+                    mention = f'<a href="tg://user?id={pidor_id}">{name}</a>'
+
+            await message.reply(
+                f"<b>Сегодняшний пидор</b> - {mention.replace('@', '')}\n"
+                f"Нового пидора можно будет выбрать с {formatted_date} (через {formatted_time_left})"
+            )
+            return
+
     pidors = await db.get_pidors(message.chat.id)
     if not pidors:
         await message.reply("<b>Никто не зарегистрирован в игре. Зарегистрироваться -</b> /pidoreg")
         return
     pidor_id = random.choice(pidors)
-
-    check_result = await db.get_todays_pidor(message.chat.id)
-    if check_result:
-        pidor_id = check_result[0]
 
     try:
         member = await message.bot.get_chat_member(message.chat.id, pidor_id)
@@ -80,15 +113,12 @@ async def pidor(message: Message) -> None:
         except NameError:  # User does not have a username
             mention = f'<a href="tg://user?id={pidor_id}">{name}</a>'
 
-    if not check_result:
-        await message.answer(random.choice(BEGINNING_STRINGS))
-        await asyncio.sleep(3)
-        await message.answer(random.choice(PROCESS_STRINGS))
-        await asyncio.sleep(3)
-        await message.answer(random.choice(PROCESS_STRINGS))
-        await asyncio.sleep(3)
-        await message.answer(random.choice(FINAL_STRINGS) + mention)
+    await message.answer(random.choice(BEGINNING_STRINGS))
+    await asyncio.sleep(3)
+    await message.answer(random.choice(PROCESS_STRINGS))
+    await asyncio.sleep(3)
+    await message.answer(random.choice(PROCESS_STRINGS))
+    await asyncio.sleep(3)
+    await message.answer(random.choice(FINAL_STRINGS) + mention)
 
-        await db.mark_as_used_pidor(message.chat.id, pidor_id)
-    else:
-        await message.reply(f"<b>Сегодняшний пидор</b> - {mention.replace('@', '')}")
+    await db.mark_as_used_pidor(message.chat.id, pidor_id)
