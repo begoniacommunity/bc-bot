@@ -23,7 +23,7 @@ async def pidorstats(message: Message) -> None:
             member = await message.bot.get_chat_member(message.chat.id, user_id)
             if member.user.username is not None:
                 name = html.quote(member.user.username)
-                mention = f"@{html.quote(name)}"
+                mention = f"{html.quote(name)}"
             else:
                 name = html.quote(member.user.first_name)
         except TelegramBadRequest:

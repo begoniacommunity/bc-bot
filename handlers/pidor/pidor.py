@@ -91,4 +91,4 @@ async def pidor(message: Message) -> None:
 
         await db.mark_as_used_pidor(message.chat.id, pidor_id)
     else:
-        await message.reply(f"<b>Сегодняшний пидор</b> - {mention}")
+        await message.reply(f"<b>Сегодняшний пидор</b> - {mention.replace('@', '')}")
