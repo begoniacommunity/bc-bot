@@ -44,7 +44,7 @@ async def pidorstats(message: Message) -> None:
             if str(entry['number_of_occurrences']).endswith(str(end)):
                 should_add_a = True
 
-        text += (html.bold(
+        text += ("\n" + html.bold(
             await get_username(entry['user_id'])) +
                  " - " +
                  html.italic(entry['number_of_occurrences']) +
