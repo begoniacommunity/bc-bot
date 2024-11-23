@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta
-
 import aiohttp
+from datetime import datetime, timedelta
 
 from main import EXCHANGERATES_TOKEN
 

@@ -1,5 +1,5 @@
 import re
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 
 def parse_time(timestr):
